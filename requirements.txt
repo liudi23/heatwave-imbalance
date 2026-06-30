@@ -1,4 +1,9 @@
+# Repo runtime deps — and the manifest Streamlit Community Cloud installs from.
+# Presentation app (app/streamlit_app.py) needs: streamlit, plotly, pandas.
+# Analysis pipeline & fetchers also use: numpy, matplotlib, requests.
+streamlit
+plotly
 pandas
 numpy
-requests
 matplotlib
+requests

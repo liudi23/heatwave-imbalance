@@ -78,6 +78,8 @@ streamlit run app/streamlit_app.py
 ```
 The app shows the headline metrics, the diurnal profiles (switchable series), the driver-attribution ranking + table, and the binned partial relationships, with the method caveats inline.
 
+To publish a live link, deploy to Streamlit Community Cloud — it's self-contained (reads the committed `app/data/` bundle, no secrets). Steps in [`docs/DEPLOY.md`](docs/DEPLOY.md).
+
 ## Compatibility
 Same `(settlement_date, settlement_period)` key, same UK-local SP convention, same retry/append/CLI fetcher pattern as `uk-system-price-forecast`. This project **reads that repo's** `system_prices_5yr.csv`, `weather_uk.csv` and `generation_mix.csv` directly (via `src/config.forecast_raw()`) and **adds** absolute-MW demand, generation-by-fuel and interconnector tables on top — so the new physical-driver series can flow back into the forecasting pipeline later if useful.
 
