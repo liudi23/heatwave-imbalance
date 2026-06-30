@@ -1,0 +1,18 @@
+# Data (reused from sister repo or fetched locally) — keep out of git
+data/raw/*.csv
+data/processed/*.csv
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.python-version
+
+# OS / editor
+.DS_Store
+.ipynb_checkpoints/
+
+# Figures are regenerated; keep the anchor one tracked, ignore the rest
+figures/*
+!figures/heatwave_diurnal_profile.png
