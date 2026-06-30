@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-06-30 20:08 UTC",
+  "mode": "proxy",
+  "date_range": [
+    "2021-05-17",
+    "2026-05-17"
+  ],
+  "n_summer_days": 277,
+  "n_attribution_days": 460,
+  "hot_threshold_c": 20.7,
+  "mild_threshold_c": 17.3,
+  "evening_price_uplift": 77.1,
+  "evening_niv_uplift": 4.4,
+  "model_r2": 0.214
+}

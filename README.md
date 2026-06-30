@@ -43,6 +43,9 @@ src/data/fetch_fuelhh.py   NEW — generation by fuel + interconnectors (MW)
 src/features/build_drivers.py      driver table (proxy now / MW-aware when fetched)
 src/analysis/heatwave_diurnal.py   anchor figure: hot vs mild diurnal profiles
 src/analysis/spike_decomposition.py  H1-H5 driver attribution of the 18:00 spike
+src/analysis/export_app_data.py    precompute the bundled data for the app
+app/streamlit_app.py               read-only results presentation (Streamlit)
+app/data/                          portable precomputed bundle the app reads
 figures/                   generated figures
 data/raw, data/processed   local datasets (gitignored)
 ```
@@ -66,6 +69,14 @@ export UK_FORECAST_REPO=/path/to/uk-system-price-forecast
 python src/analysis/heatwave_diurnal.py
 ```
 `src/config.forecast_raw()` prefers the sister repo if `UK_FORECAST_REPO` is set (or it sits in `../uk-system-price-forecast`), and otherwise falls back to this repo's own `data/raw/`.
+
+**Presentation app** (read-only, portable — reads the bundled `app/data/`, no live data needed):
+```bash
+pip install -r app/requirements.txt
+python src/analysis/export_app_data.py   # refresh the bundle (optional; committed copy exists)
+streamlit run app/streamlit_app.py
+```
+The app shows the headline metrics, the diurnal profiles (switchable series), the driver-attribution ranking + table, and the binned partial relationships, with the method caveats inline.
 
 ## Compatibility
 Same `(settlement_date, settlement_period)` key, same UK-local SP convention, same retry/append/CLI fetcher pattern as `uk-system-price-forecast`. This project **reads that repo's** `system_prices_5yr.csv`, `weather_uk.csv` and `generation_mix.csv` directly (via `src/config.forecast_raw()`) and **adds** absolute-MW demand, generation-by-fuel and interconnector tables on top — so the new physical-driver series can flow back into the forecasting pipeline later if useful.
