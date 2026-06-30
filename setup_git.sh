@@ -36,6 +36,8 @@ echo "==> git init on branch '$BRANCH' + first commit…"
 git init -b "$BRANCH"
 git config user.name  "$GIT_USER_NAME"
 git config user.email "$GIT_USER_EMAIL"
+# Drop any stray sandbox artefact before staging.
+rm -f _perm_test.txt
 git add -A
 git commit -m "Phase 1: heatwave stress on GB balancing — scaffold, BMRS fetchers, anchor figure
 
@@ -50,16 +52,16 @@ echo "==> Local commit ready:"
 git log --oneline -1
 
 # 3. Point at the existing GitHub repo and push to the mvp branch.
+#    The remote mvp may already hold GitHub's auto-init commit (README/license
+#    added at repo creation). We overwrite it with this project history using
+#    the safe force variant: --force-with-lease only overwrites if nothing new
+#    landed on the remote since our fetch.
 echo
-echo "==> Adding remote and pushing to '$BRANCH'…"
-git remote add origin "$REMOTE_URL"
-git push -u origin "$BRANCH"
+echo "==> Adding remote and pushing to '$BRANCH' (overwriting auto-init)…"
+git remote add origin "$REMOTE_URL" 2>/dev/null || git remote set-url origin "$REMOTE_URL"
+git fetch origin
+git push -u origin "$BRANCH" --force-with-lease
 
 echo
 echo "==> Done. Pushed to $REMOTE_URL ($BRANCH)."
 echo "    View: https://github.com/liudi23/heatwave-imbalance/tree/$BRANCH"
-echo
-echo "    If the push was REJECTED (the remote mvp branch already has commits),"
-echo "    reconcile first, then push again:"
-echo "        git pull --rebase origin $BRANCH   # or: git pull --no-rebase origin $BRANCH"
-echo "        git push -u origin $BRANCH"

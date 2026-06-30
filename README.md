@@ -14,6 +14,21 @@ Across five summers, on the **hottest 20% of days** the imbalance price in the e
 
 > Caveat: at a population-weighted *national* level the hottest summer quintile tops out near ~21 °C, so this first cut uses a percentile "hot day" label. The strict Met Office heatwave definition (≥3 consecutive days over a regional absolute threshold) and the absolute net-demand decomposition come with the demand/FUELHH data (next step).
 
+## Driver attribution (first pass)
+
+Regressing each summer day's evening-peak (SP35–38) imbalance price on standardised physical drivers gives a rankable, partial attribution (R² ≈ 0.21, n = 460 days):
+
+| Driver | Hypothesis | £/MWh per +1 SD | Spearman |
+|---|---|--:|--:|
+| Daily max temperature | H1/H4 demand & derate | **+36** | +0.21 |
+| Evening wind share | H3 low wind | **−31** | −0.36 |
+| Midday solar | H2 solar drop-off | −20 | +0.01 |
+| Evening \|NIV\| | volume | +17 | +0.05 |
+
+![Spike decomposition](figures/spike_decomposition.png)
+
+The two robust, large-t signals are **temperature (+) and wind share (−)**: hot, low-wind evenings carry the premium — exactly the anticyclonic-heat mechanism (H3 + thermal/demand stress). Wind share has the strongest univariate relationship (−0.36). Two honest nuances: the model explains only ~21% of day-to-day variation (evening spikes are tail/margin events these proxies don't fully capture), and midday solar flips sign between univariate (~0) and partial (−), because the proxy can't separate solar *level* from solar *drop-off*. Both point to the same gap — **absolute net demand, its evening ramp (H1), and interconnector imports (H5)**, which arrive once `fetch_demand`/`fetch_fuelhh` are run and should lift the explained variance. The pipeline auto-upgrades from "proxy" to "full" mode when those CSVs are present.
+
 ## Layout
 ```
 PHASE1_SCOPE.md            project framing, hypotheses, method, deliverables
@@ -25,7 +40,9 @@ src/data/fetch_elexon.py   imbalance price + NIV   (vendored from forecast repo)
 src/data/fetch_weather.py  Open-Meteo UK weather   (vendored from forecast repo)
 src/data/fetch_demand.py   NEW — INDO/ITSDO demand outturn (MW)
 src/data/fetch_fuelhh.py   NEW — generation by fuel + interconnectors (MW)
+src/features/build_drivers.py      driver table (proxy now / MW-aware when fetched)
 src/analysis/heatwave_diurnal.py   anchor figure: hot vs mild diurnal profiles
+src/analysis/spike_decomposition.py  H1-H5 driver attribution of the 18:00 spike
 figures/                   generated figures
 data/raw, data/processed   local datasets (gitignored)
 ```
@@ -40,6 +57,7 @@ python src/data/fetch_weather.py  --start 2021-06-01 --end 2026-08-31   # UK wea
 python src/data/fetch_demand.py   --start 2022-06-01 --end 2022-08-31   # demand (MW)
 python src/data/fetch_fuelhh.py   --start 2022-06-01 --end 2022-08-31   # gen by fuel (MW)
 python src/analysis/heatwave_diurnal.py                                  # anchor figure
+python src/analysis/spike_decomposition.py                               # H1-H5 attribution
 ```
 
 **Reuse** the sister repo's already-downloaded data instead of re-fetching:
@@ -53,4 +71,4 @@ python src/analysis/heatwave_diurnal.py
 Same `(settlement_date, settlement_period)` key, same UK-local SP convention, same retry/append/CLI fetcher pattern as `uk-system-price-forecast`. This project **reads that repo's** `system_prices_5yr.csv`, `weather_uk.csv` and `generation_mix.csv` directly (via `src/config.forecast_raw()`) and **adds** absolute-MW demand, generation-by-fuel and interconnector tables on top — so the new physical-driver series can flow back into the forecasting pipeline later if useful.
 
 ## Status
-Phase 1, in progress. Done: scope, reuse scaffolding, two new BMRS fetchers, anchor figure. Next: pull demand + FUELHH for the heatwave windows, build absolute net demand, decompose the evening spike across H1–H5, and write the short public writeup.
+Phase 1, in progress. Done: scope, reuse scaffolding, two new BMRS fetchers, anchor figure, and a first-pass H1–H5 driver attribution (proxy mode). Next: run `fetch_demand`/`fetch_fuelhh` over the heatwave windows to unlock full mode (net-demand ramp H1 + interconnectors H5), add Sheffield PV_Live for absolute embedded solar, and write the short public writeup.
