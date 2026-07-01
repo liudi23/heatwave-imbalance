@@ -48,6 +48,25 @@ FULL_EXTRA = {
     "netdem_ramp":   ("Net-demand ramp SP30->peak", "H1 net-demand ramp"),
     "ic_import_eve": ("Interconnector net import", "H5 imports"),
 }
+# In full mode, replace the irradiance proxy for H2 with the absolute solar
+# drop-off (MW lost midday->peak) when it is available.
+SOLAR_FULL = {"solar_dropoff_mw": ("Solar drop-off midday->peak", "H2 solar drop-off")}
+
+
+def select_drivers(columns, mode: str) -> dict:
+    """Driver dict for the given mode, restricted to columns that exist.
+
+    Shared by the decomposition and the app-data export so both stay in sync.
+    """
+    drivers = dict(PROXY_DRIVERS)
+    if mode == "full":
+        if "solar_dropoff_mw" in columns:          # upgrade H2 proxy -> absolute
+            drivers.pop("solar_midday", None)
+            drivers.update(SOLAR_FULL)
+        for k, v in FULL_EXTRA.items():
+            if k in columns:
+                drivers[k] = v
+    return {c: drivers[c] for c in drivers if c in columns}
 
 
 def standardise(x: pd.Series) -> pd.Series:
@@ -74,12 +93,8 @@ def main() -> None:
     sp, mode = build_sp_table()
     day = evening_peak_by_day(sp)
 
-    drivers = dict(PROXY_DRIVERS)
-    if mode == "full":
-        for k, v in FULL_EXTRA.items():
-            if k in day.columns:
-                drivers[k] = v
-    cols = [c for c in drivers if c in day.columns]
+    drivers = select_drivers(day.columns, mode)
+    cols = list(drivers)
 
     d = day.dropna(subset=cols + ["price_eve"]).copy()
     Xs = np.column_stack([standardise(d[c]).values for c in cols])

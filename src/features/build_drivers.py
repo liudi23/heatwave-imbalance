@@ -138,6 +138,7 @@ def evening_peak_by_day(sp: pd.DataFrame, summer_only: bool = True) -> pd.DataFr
     Full-mode extra drivers (added when present):
         netdem_ramp     net-demand rise from SP30 -> peak      (H1)
         netdem_eve      net demand at the peak                 (H1 level)
+        solar_dropoff_mw  solar MW lost midday -> peak          (H2, absolute)
         ic_import_eve   interconnector net import at the peak  (H5, higher=looser)
         thermal_share_eve                                       (H4)
     """
@@ -166,6 +167,12 @@ def evening_peak_by_day(sp: pd.DataFrame, summer_only: bool = True) -> pd.DataFr
         if RAMP_FROM_SP in piv.columns and peak_cols:
             out["netdem_eve"] = piv[peak_cols].mean(axis=1)
             out["netdem_ramp"] = piv[peak_cols].mean(axis=1) - piv[RAMP_FROM_SP]
+    if "solar_mw" in d.columns:
+        # Absolute solar drop-off into the peak: midday MW minus evening MW.
+        # A cleaner H2 signal than irradiance — the actual generation lost.
+        mid_solar = mid.groupby("settlement_date")["solar_mw"].mean()
+        eve_solar = eve.groupby("settlement_date")["solar_mw"].mean()
+        out["solar_dropoff_mw"] = mid_solar - eve_solar
     if "interconnector_net_mw" in d.columns:
         out["ic_import_eve"] = eve.groupby("settlement_date")["interconnector_net_mw"].mean()
     if "thermal_share" in d.columns:

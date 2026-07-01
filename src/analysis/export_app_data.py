@@ -29,7 +29,7 @@ from src.features.build_drivers import (  # noqa: E402
     build_sp_table, evening_peak_by_day, SUMMER_MONTHS, EVENING_SPS,
 )
 from src.analysis.spike_decomposition import (  # noqa: E402
-    PROXY_DRIVERS, FULL_EXTRA, standardise, ols,
+    select_drivers, standardise, ols,
 )
 
 APP_DATA = REPO_ROOT / "app" / "data"
@@ -66,10 +66,8 @@ def main() -> None:
 
     # 2. Attribution (re-fit, same as spike_decomposition)
     day = evening_peak_by_day(sp)
-    drivers = dict(PROXY_DRIVERS)
-    if mode == "full":
-        drivers.update({k: v for k, v in FULL_EXTRA.items() if k in day.columns})
-    cols = [c for c in drivers if c in day.columns]
+    drivers = select_drivers(day.columns, mode)
+    cols = list(drivers)
     d = day.dropna(subset=cols + ["price_eve"]).copy()
     Xs = np.column_stack([standardise(d[c]).values for c in cols])
     beta, se, tstat, r2 = ols(Xs, d["price_eve"].values)
