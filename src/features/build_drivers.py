@@ -80,13 +80,24 @@ def _load_full_mw(local_raw: Path) -> pd.DataFrame | None:
         return None
     d = pd.read_csv(demand_f)
     g = pd.read_csv(fuel_f)
-    for df in (d, g):
+    frames = [d, g]
+    # Embedded solar (PV_Live) is optional but preferred — it completes net demand.
+    solar_f = local_raw / "solar_pvlive.csv"
+    solar = pd.read_csv(solar_f) if solar_f.exists() else None
+    if solar is not None:
+        frames.append(solar)
+    for df in frames:
         df["settlement_date"] = pd.to_datetime(df["settlement_date"]).dt.strftime("%Y-%m-%d")
     m = d.merge(g, on=["settlement_date", "settlement_period"], how="inner")
-    # Absolute net demand (excl. transmission wind). Embedded solar is added once
-    # PV_Live is wired in; until then the irradiance proxy carries H2.
+    if solar is not None:
+        m = m.merge(solar, on=["settlement_date", "settlement_period"], how="left")
+    # Absolute net demand = demand - wind - solar. Wind here is transmission-metered
+    # (FUELHH); solar is PV_Live embedded outturn when present, else omitted (the
+    # irradiance proxy then still carries H2 in the day-level aggregation).
     if {"indo_mw", "wind_mw"}.issubset(m.columns):
         m["net_demand_mw"] = m["indo_mw"] - m["wind_mw"]
+        if "solar_mw" in m.columns:
+            m["net_demand_mw"] = m["net_demand_mw"] - m["solar_mw"].fillna(0)
     thermal = [c for c in ("ccgt_mw", "coal_mw", "biomass_mw", "ocgt_mw", "oil_mw")
                if c in m.columns]
     if thermal and "total_generation_mw" in m.columns:

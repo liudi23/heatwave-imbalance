@@ -40,6 +40,7 @@ src/data/fetch_elexon.py   imbalance price + NIV   (vendored from forecast repo)
 src/data/fetch_weather.py  Open-Meteo UK weather   (vendored from forecast repo)
 src/data/fetch_demand.py   NEW — INDO/ITSDO demand outturn (MW)
 src/data/fetch_fuelhh.py   NEW — generation by fuel + interconnectors (MW)
+src/data/fetch_solar.py    NEW — PV_Live national embedded solar (MW) -> H2
 src/features/build_drivers.py      driver table (proxy now / MW-aware when fetched)
 src/analysis/heatwave_diurnal.py   anchor figure: hot vs mild diurnal profiles
 src/analysis/spike_decomposition.py  H1-H5 driver attribution of the 18:00 spike
@@ -59,6 +60,7 @@ python src/data/fetch_elexon.py   --start 2021-06-01 --end 2026-08-31   # price 
 python src/data/fetch_weather.py  --start 2021-06-01 --end 2026-08-31   # UK weather
 python src/data/fetch_demand.py   --start 2022-06-01 --end 2022-08-31   # demand (MW)
 python src/data/fetch_fuelhh.py   --start 2022-06-01 --end 2022-08-31   # gen by fuel (MW)
+python src/data/fetch_solar.py    --start 2022-06-01 --end 2022-08-31   # embedded solar (MW)
 python src/analysis/heatwave_diurnal.py                                  # anchor figure
 python src/analysis/spike_decomposition.py                               # H1-H5 attribution
 ```

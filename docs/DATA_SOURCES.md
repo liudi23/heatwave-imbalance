@@ -24,8 +24,14 @@ Base URL: `https://data.elexon.co.uk/bmrs/api/v1`. **No auth required** for Insi
 |---|---|---|
 | `temp_c`, `wind_ms`, `solar_wm2`, `precip_mm` | **Open-Meteo ERA5 archive** (free, no key) | Population-weighted England/Scotland/Wales. **Reused** from the forecast repo's `fetch_weather.py`. ~2-day archive lag. |
 
-## Solar (gap to close next)
-FUELHH covers only **transmission-metered** generation, so **embedded solar and embedded wind are excluded**. For absolute solar MW use **Sheffield Solar PV_Live** (`https://api.solar.sheffield.ac.uk/pvlive/api/v4`, free) or the **NESO Embedded Solar/Wind forecast**. Until then, `solar_wm2` irradiance from Open-Meteo is a usable proxy for the solar drop-off (H2).
+## Solar — embedded outturn (implemented)
+FUELHH covers only **transmission-metered** generation, so **embedded solar** (most of GB solar) is excluded. Absolute national solar MW comes from **Sheffield Solar PV_Live**:
+
+| Field | Source | Endpoint | Script |
+|---|---|---|---|
+| `solar_mw` | **PV_Live** national outturn (GSP 0) | `GET /pvlive/api/v4/gsp/0?start=&end=` | `src/data/fetch_solar.py` |
+
+Base URL `https://api.solar.sheffield.ac.uk/pvlive/api/v4`, free/no key. **Time alignment:** PV_Live `datetime_gmt` is **period-ending** UTC — the fetcher shifts back 30 min to the period start before deriving the UK-local SP (confirm on first run; toggle `PERIOD_ENDING` if needed). `solar_mw` completes absolute **net demand = demand − wind − solar** in `build_drivers.py`; the Open-Meteo `solar_wm2` irradiance remains a fallback proxy when PV_Live isn't present.
 
 ## What is reused vs new
 - **Reused from `uk-system-price-forecast`:** `system_prices_5yr.csv`, `weather_uk.csv`, `generation_mix.csv` (wind %/gas %), the SP/UK-time convention, and the retry/backoff + append/CLI fetcher pattern.
