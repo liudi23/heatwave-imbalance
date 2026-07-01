@@ -27,7 +27,9 @@ Regressing each summer day's evening-peak (SP35–38) imbalance price on standar
 
 ![Spike decomposition](figures/spike_decomposition.png)
 
-The two robust, large-t signals are **temperature (+) and wind share (−)**: hot, low-wind evenings carry the premium — exactly the anticyclonic-heat mechanism (H3 + thermal/demand stress). Wind share has the strongest univariate relationship (−0.36). Two honest nuances: the model explains only ~21% of day-to-day variation (evening spikes are tail/margin events these proxies don't fully capture), and midday solar flips sign between univariate (~0) and partial (−), because the proxy can't separate solar *level* from solar *drop-off*. Both point to the same gap — **absolute net demand, its evening ramp (H1), and interconnector imports (H5)**, which arrive once `fetch_demand`/`fetch_fuelhh` are run and should lift the explained variance. The pipeline auto-upgrades from "proxy" to "full" mode when those CSVs are present.
+The two robust, large-t signals are **temperature (+) and wind share (−)**: hot, low-wind evenings carry the premium — exactly the anticyclonic-heat mechanism (H3 + thermal/demand stress). Wind share has the strongest univariate relationship (−0.36).
+
+The full narrative — findings, caveats, and the decarbonisation read-across — is written up in [`docs/writeup.md`](docs/writeup.md). Two honest nuances: the model explains only ~21% of day-to-day variation (evening spikes are tail/margin events these proxies don't fully capture), and midday solar flips sign between univariate (~0) and partial (−), because the proxy can't separate solar *level* from solar *drop-off*. Both point to the same gap — **absolute net demand, its evening ramp (H1), and interconnector imports (H5)**, which arrive once `fetch_demand`/`fetch_fuelhh` are run and should lift the explained variance. The pipeline auto-upgrades from "proxy" to "full" mode when those CSVs are present.
 
 ## Layout
 ```
